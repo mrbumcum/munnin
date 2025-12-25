@@ -1,31 +1,35 @@
 package main
 
 import (
-	"fmt"
-	"html"
-	"log"
+	"flag"
 	"net/http"
 	"time"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Testing home handler by printing URL path %q", html.EscapeString(r.URL.Path))
-}
+var (
+	port string
+	originServer string
+)
 
 func main() {
-	PORT := ":8080"
+	flag.StringVar(&port, "port", "8080", "TCP connection the server listens on")
+	flag.StringVar(&originServer, "originServer", "origin", "URL of the origin server")
+	flag.Parse()
+
 	mux := http.NewServeMux()
+	mux.HandleFunc("/", handleRequest)
 
-	mux.HandleFunc("/home", homeHandler)
-
-	
-	s := &http.Server{
-		Addr:           PORT,
-		Handler:        mux,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20, // 1 MB = 2^20 bytes
+	srv := &http.Server{
+		Addr: ":"+port,
+		Handler: mux,
+		ReadTimeout: 10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
-	log.Fatal(s.ListenAndServe())
+	srv.ListenAndServe()
+
 }
+
+func handleRequest(w http.ResponseWriter, r *http.Request) {
+
+} 
